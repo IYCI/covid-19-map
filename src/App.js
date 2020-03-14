@@ -27,7 +27,6 @@ function App() {
       try {
         const unixTime = new Date().valueOf();
         const { data } = await axios.get(`${GEO_JSON_API}?ts=${unixTime}`);
-        // console.log(geoJSONResult)
         setGeoJson(data);
       } catch (err) {
         console.error(err);
@@ -41,7 +40,6 @@ function App() {
       return null;
     }
     const { x, y, name, data: { confirmed, deaths, recovered } } = toolTipData;
-    console.log(name, confirmed, deaths, recovered)
     return (
       <div style={{ position: 'absolute', zIndex: 1, pointerEvents: 'none', left: x, top: y, backgroundColor: 'white', padding: '1rem', borderRadius: '4px' }}>
         <h2 style={{ margin: '0 0 1rem 0' }}>{name}</h2>
@@ -59,11 +57,8 @@ function App() {
       id: 'countries-geo-json',
       data: geoJson,
       getFillColor: d => {
-        // console.log(d)
         if (d.properties.data.confirmed > 0) {
-          // console.log(d.properties.data.confirmed / 2000);
           return colorScale(d.properties.data.confirmed / 7000).rgb();
-          // return [160, 160, 180, 200];
         }
         return [0, 0, 0, 0];
       },
