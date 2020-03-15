@@ -3,9 +3,7 @@ import urllib.parse
 import csv
 import json
 from datetime import datetime
-
-with open('./country-mapping.json') as f:
-  countryMapping = json.load(f)
+from pathlib import Path
 
 CONFIRMED_DATA_URL = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
 DEATHS_DATA_URL = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
@@ -140,14 +138,18 @@ def appendMetricData(url, field):
       date = convertDateString(headers[i])
       timeSeries[date][field] = int(row[i])
 
-countryData = {}
-
 def main():
   create_inital_data()
   appendMetricData(DEATHS_DATA_URL, 'd')
   appendMetricData(RECOVERED_DATA_URL, 'r')
-  with open('country-data.json', 'w') as f:
+  countryData['timestamp'] = round(datetime.now().timestamp())
+  fileOutputPath = Path(__file__).parent / 'country-data.json'
+  with open(fileOutputPath, 'w') as f:
     json.dump(countryData, f)
 
 if __name__ == '__main__':
-    main()
+  countryData = {}
+  countryMappingPath = Path(__file__).parent / 'country-mapping.json'
+  with open(countryMappingPath) as f:
+    countryMapping = json.load(f)
+  main()
