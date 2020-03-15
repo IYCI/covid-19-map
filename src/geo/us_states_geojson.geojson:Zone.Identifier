@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://team.carto.com/u/piensaenpixel/tables/us_states_geojson/public
+HostUrl=https://piensaenpixel.carto.com/api/v2/sql?filename=us_states_geojson&q=select+*+from+piensaenpixel.us_states_geojson&format=geojson&bounds=&api_key=
