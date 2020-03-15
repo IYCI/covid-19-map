@@ -70,14 +70,16 @@ function App() {
     if (!toolTipData) {
       return null;
     }
-    const { x, y, name, id, data: { confirmed, deaths, recovered, active } } = toolTipData;
+    console.log(toolTipData)
+    const { x, y, name, id, data: { confirmed = 0, deaths = 0, recovered = 0, active = 0, lastUpdate = null } = {} } = toolTipData;
     return (
       <div style={{ position: 'absolute', zIndex: 1, pointerEvents: 'none', left: x, top: y, backgroundColor: 'white', padding: '1rem', borderRadius: '4px' }}>
         <h2 style={{ margin: '0 0 1rem 0' }}>{name} - {id}</h2>
+        <div>active: {active}</div>
         <div>confirmed: {confirmed}</div>
         <div>deaths: {deaths}</div>
         <div>recovered: {recovered}</div>
-        <div>active: {active}</div>
+        { lastUpdate && (<div>last update: {new Date(lastUpdate).toLocaleString()}</div>)}
       </div>
     );
   }
@@ -91,7 +93,7 @@ function App() {
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
       getFillColor: d => {
-        const metric = 'confirmed'; // TODO: make this switchable
+        const metric = 'active'; // TODO: make this switchable
         if (['USA'].includes(d.id)) { // temperary solution to hide for country that province layer exists
           return [0, 0, 0, 0];
         }
@@ -113,7 +115,9 @@ function App() {
           if (id === 'USA') {
             return setToolTip(null);
           }
-          setToolTip({ ...properties, id, x, y })
+
+          const stats = globalData[id];
+          setToolTip({ name: properties.name, data: stats, id, x, y })
         } else {
           setToolTip(null);
         }
@@ -132,7 +136,7 @@ function App() {
         if (!globalData['USA']) {
           return [0, 0, 0, 0];
         }
-        const metric = 'confirmed'; // TODO: make this switchable
+        const metric = 'active'; // TODO: make this switchable
         const states = globalData['USA'].provinces;
         if (states[d.properties.name] && states[d.properties.name][metric] > 0) {
           // console.log(states[d.properties.name])
