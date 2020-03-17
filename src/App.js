@@ -9,6 +9,7 @@ import { pick } from 'lodash';
 import './App.css';
 import US_STATES from './geo/us-states.geojson';
 
+const MAPBOX_STYLE = 'mapbox://styles/jason-feng/ck7ryfd7y00xd1jqkfxb237mx'
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiamFzb24tZmVuZyIsImEiOiJjazdyeWJwNGMwNG1mM2hsOGRna2FjZDZwIn0.9VnUs6uEsVOnw_WqMUwQVg' // jason
 // const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiaGF4emllIiwiYSI6ImNqZ2c2NWp3OTBxenAzM3FzeThydmZ0YncifQ.584ugILuKFfDPTxqyiO_0g' // borrow
 const initialViewState = {
@@ -25,6 +26,7 @@ const metrics = ['confirmed', 'recovered', 'deaths', 'active'];
 const colorScale = chroma.scale(['lightgreen', 'red', 'black']);
 
 function App() {
+  const [staticMap, setStaticMap] = useState();
   const [geoJson, setGeoJson] = useState();
   // globalData: { <countryCode>: { provinceState, countryRegion, lastUpdate, lat, long, confirmed, recovered, deaths, active } }
   const [globalData, setGlobalData] = useState({});
@@ -99,7 +101,7 @@ function App() {
         }
         if (globalData[d.id] && globalData[d.id][metric] > 0) {
           const metricValue = globalData[d.id][metric];
-          return colorScale(metricValue / 7000).rgb();
+          return [ ...colorScale(metricValue / 7000).rgb(), 150 ];
         }
         return [0, 0, 0, 0];
       },
@@ -141,7 +143,7 @@ function App() {
         if (states[d.properties.name] && states[d.properties.name][metric] > 0) {
           // console.log(states[d.properties.name])
           const metricValue = states[d.properties.name][metric];
-          return colorScale(metricValue / 3000).rgb();
+          return [ ...colorScale(metricValue / 3000).rgb(), 150 ];
         }
         return [0, 0, 0, 0];
       },
@@ -169,13 +171,18 @@ function App() {
     }),
   ];
 
+  // if (staticMap) {
+  //   console.log(staticMap.getMap());
+  // }
+
   return (
     <DeckGL
       initialViewState={initialViewState}
       controller={true}
       layers={layers}
+      Style={{ width: '100vw', height: '100vh'}}
     >
-      <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      <StaticMap ref={setStaticMap} width='100%' height='100%' mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={MAPBOX_STYLE} />
       { _renderTooltip() }
     </DeckGL>
   );
