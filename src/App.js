@@ -5,9 +5,14 @@ import { StaticMap } from 'react-map-gl';
 import axios from 'axios';
 import chroma from 'chroma-js';
 import { pick } from 'lodash';
+import 'antd/dist/antd.css';
+import { Button, Radio } from 'antd';
 
+
+import { getFillColor, getFillColorProvince } from './utils';
 import './App.css';
 import US_STATES from './geo/us-states.geojson';
+import CANADA_PROVINCES from './geo/canada-provinces.geojson';
 
 const MAPBOX_STYLE = 'mapbox://styles/jason-feng/ck7ryfd7y00xd1jqkfxb237mx'
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiamFzb24tZmVuZyIsImEiOiJjazdyeWJwNGMwNG1mM2hsOGRna2FjZDZwIn0.9VnUs6uEsVOnw_WqMUwQVg' // jason
@@ -31,6 +36,8 @@ function App() {
   // globalData: { <countryCode>: { provinceState, countryRegion, lastUpdate, lat, long, confirmed, recovered, deaths, active } }
   const [globalData, setGlobalData] = useState({});
   const [toolTipData, setToolTip] = useState(); // { x, y, id, name, data: { confirmed, deaths, recovered } }
+  const [metric, setMetric] = useState('active');
+  const [resolution, setResolution] = useState('country');
 
   useEffect(() => {
     const loadData = async () => {
@@ -72,7 +79,7 @@ function App() {
     if (!toolTipData) {
       return null;
     }
-    console.log(toolTipData)
+    // console.log(toolTipData)
     const { x, y, name, id, data: { confirmed = 0, deaths = 0, recovered = 0, active = 0, lastUpdate = null } = {} } = toolTipData;
     return (
       <div style={{ position: 'absolute', zIndex: 1, pointerEvents: 'none', left: x, top: y, backgroundColor: 'white', padding: '1rem', borderRadius: '4px' }}>
@@ -94,16 +101,9 @@ function App() {
       data: geoJson,
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
-      getFillColor: d => {
-        const metric = 'active'; // TODO: make this switchable
-        if (['USA'].includes(d.id)) { // temperary solution to hide for country that province layer exists
-          return [0, 0, 0, 0];
-        }
-        if (globalData[d.id] && globalData[d.id][metric] > 0) {
-          const metricValue = globalData[d.id][metric];
-          return [ ...colorScale(metricValue / 7000).rgb(), 150 ];
-        }
-        return [0, 0, 0, 0];
+      getFillColor: d => getFillColor(globalData, metric, d.id, resolution),
+      updateTriggers: {
+        getFillColor: [globalData, metric, resolution]
       },
 
       /* interact */
@@ -134,21 +134,9 @@ function App() {
       data: US_STATES,
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
-      getFillColor: d => {
-        if (!globalData['USA']) {
-          return [0, 0, 0, 0];
-        }
-        const metric = 'active'; // TODO: make this switchable
-        const states = globalData['USA'].provinces;
-        if (states[d.properties.name] && states[d.properties.name][metric] > 0) {
-          // console.log(states[d.properties.name])
-          const metricValue = states[d.properties.name][metric];
-          return [ ...colorScale(metricValue / 3000).rgb(), 150 ];
-        }
-        return [0, 0, 0, 0];
-      },
+      getFillColor: d => getFillColorProvince(globalData, metric, 'USA', resolution, d.properties.name),
       updateTriggers: {
-        getFillColor: [globalData]
+        getFillColor: [globalData, metric, resolution]
       },
       pickable: true,
       onHover: (data) => {
@@ -169,6 +157,34 @@ function App() {
         console.log('clicked:', data)
       },
     }),
+    new GeoJsonLayer ({
+      id: 'canada-provinces-geo-json',
+      data: CANADA_PROVINCES,
+      highlightColor: [0, 0, 0, 50],
+      autoHighlight: true,
+      getFillColor: d => getFillColorProvince(globalData, metric, 'CAN', resolution, d.properties.name),
+      updateTriggers: {
+        getFillColor: [globalData, metric, resolution]
+      },
+      pickable: true,
+      onHover: (data) => {
+        if (data.object) {
+          const { x, y, object: { properties: { name } } } = data;
+          const states = globalData['CAN'].provinces;
+          // console.log(states[name])
+          // const stats = states[name]
+          if (!states[name]) {
+            return setToolTip(null);
+          }
+          setToolTip({ data: states[name], x, y, id: name, name: 'CAN' })
+        } else {
+          setToolTip(null);
+        }
+      },
+      onClick: (data) => {
+        console.log('clicked:', data)
+      },
+    }),
   ];
 
   // if (staticMap) {
@@ -176,15 +192,30 @@ function App() {
   // }
 
   return (
-    <DeckGL
-      initialViewState={initialViewState}
-      controller={true}
-      layers={layers}
-      Style={{ width: '100vw', height: '100vh'}}
-    >
-      <StaticMap ref={setStaticMap} width='100%' height='100%' mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={MAPBOX_STYLE} />
+    <div>
+      <div style={{ margin: '1rem', position: 'absolute', zIndex: 2 }}>
+        <Radio.Group value={metric} onChange={e => setMetric(e.target.value)}>
+          <Radio.Button value="active">Active</Radio.Button>
+          <Radio.Button value="confirmed">Confirmed</Radio.Button>
+          <Radio.Button value="deaths">Deaths</Radio.Button>
+          <Radio.Button value="recovered">Recovered</Radio.Button>
+        </Radio.Group>
+        <Radio.Group value={resolution} onChange={e => setResolution(e.target.value)} style={{ marginLeft: '1rem' }}>
+          <Radio.Button value="country">Country</Radio.Button>
+          <Radio.Button value="province">Province</Radio.Button>
+        </Radio.Group>
+      </div>
+      <DeckGL
+        initialViewState={initialViewState}
+        controller={true}
+        layers={layers}
+        Style={{ width: '100vw', height: '100vh'}}
+      >
+        <StaticMap ref={setStaticMap} width='100%' height='100%' mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={MAPBOX_STYLE} />
+        
+      </DeckGL>
       { _renderTooltip() }
-    </DeckGL>
+    </div>
   );
 }
 
