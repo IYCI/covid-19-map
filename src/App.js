@@ -3,16 +3,16 @@ import DeckGL from '@deck.gl/react';
 import { GeoJsonLayer  } from '@deck.gl/layers'; // GeoJsonLayer 
 import { StaticMap } from 'react-map-gl';
 import axios from 'axios';
-import chroma from 'chroma-js';
 import { pick } from 'lodash';
 import 'antd/dist/antd.css';
-import { Button, Radio } from 'antd';
+import { Radio } from 'antd';
 
 
-import { getFillColor, getFillColorProvince } from './utils';
+import { getFillColor, getFillColorProvince, onHover, onHoverProvince } from './utils';
 import './App.css';
 import US_STATES from './geo/us-states.geojson';
 import CANADA_PROVINCES from './geo/canada-provinces.geojson';
+import CHINA_PROVINCES from './geo/china-provinces.geojson'
 
 const MAPBOX_STYLE = 'mapbox://styles/jason-feng/ck7ryfd7y00xd1jqkfxb237mx'
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiamFzb24tZmVuZyIsImEiOiJjazdyeWJwNGMwNG1mM2hsOGRna2FjZDZwIn0.9VnUs6uEsVOnw_WqMUwQVg' // jason
@@ -28,9 +28,10 @@ const GEO_JSON_API = 'https://raw.githubusercontent.com/haxzie/covid19-layers-ap
 const GLOBAL_API = 'https://covid19.mathdro.id/api/confirmed';
 const fieldsToFilter = ['provinceState', 'countryRegion', 'lastUpdate', 'lat', 'long', 'confirmed', 'recovered', 'deaths', 'active'];
 const metrics = ['confirmed', 'recovered', 'deaths', 'active'];
-const colorScale = chroma.scale(['lightgreen', 'red', 'black']);
+// const colorScale = chroma.scale(['lightgreen', 'red', 'black']);
 
 function App() {
+  // eslint-disable-next-line no-unused-vars
   const [staticMap, setStaticMap] = useState();
   const [geoJson, setGeoJson] = useState();
   // globalData: { <countryCode>: { provinceState, countryRegion, lastUpdate, lat, long, confirmed, recovered, deaths, active } }
@@ -108,22 +109,7 @@ function App() {
 
       /* interact */
       pickable: true,
-      // onHover: (asd) => {
-      //   console.log(asd)
-      // },
-      onHover: (data) => {
-        if (data.object) {
-          const { x, y, object: { id, properties } } = data;
-          if (id === 'USA') {
-            return setToolTip(null);
-          }
-
-          const stats = globalData[id];
-          setToolTip({ name: properties.name, data: stats, id, x, y })
-        } else {
-          setToolTip(null);
-        }
-      },
+      onHover: data => onHover(data, setToolTip, globalData, resolution),
       onClick: (data) => {
         console.log('clicked:', data)
         console.log('country data:', globalData[data.object.id]);
@@ -134,25 +120,13 @@ function App() {
       data: US_STATES,
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
+      visible: resolution === 'province',
       getFillColor: d => getFillColorProvince(globalData, metric, 'USA', resolution, d.properties.name),
       updateTriggers: {
         getFillColor: [globalData, metric, resolution]
       },
       pickable: true,
-      onHover: (data) => {
-        if (data.object) {
-          const { x, y, object: { properties: { name } } } = data;
-          const states = globalData['USA'].provinces;
-          // console.log(states[name])
-          // const stats = states[name]
-          if (!states[name]) {
-            return setToolTip(null);
-          }
-          setToolTip({ data: states[name], x, y, id: name, name: 'USA' })
-        } else {
-          setToolTip(null);
-        }
-      },
+      onHover: data => onHoverProvince(data, setToolTip, globalData, resolution),
       onClick: (data) => {
         console.log('clicked:', data)
       },
@@ -162,45 +136,46 @@ function App() {
       data: CANADA_PROVINCES,
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
+      visible: resolution === 'province',
       getFillColor: d => getFillColorProvince(globalData, metric, 'CAN', resolution, d.properties.name),
       updateTriggers: {
         getFillColor: [globalData, metric, resolution]
       },
       pickable: true,
-      onHover: (data) => {
-        if (data.object) {
-          const { x, y, object: { properties: { name } } } = data;
-          const states = globalData['CAN'].provinces;
-          // console.log(states[name])
-          // const stats = states[name]
-          if (!states[name]) {
-            return setToolTip(null);
-          }
-          setToolTip({ data: states[name], x, y, id: name, name: 'CAN' })
-        } else {
-          setToolTip(null);
-        }
+      onHover: data => onHoverProvince(data, setToolTip, globalData, resolution),
+      onClick: (data) => {
+        console.log('clicked:', data)
       },
+    }),
+    new GeoJsonLayer ({
+      id: 'china-provinces-geo-json',
+      data: CHINA_PROVINCES,
+      highlightColor: [0, 0, 0, 50],
+      autoHighlight: true,
+      visible: resolution === 'province',
+      getFillColor: d => getFillColorProvince(globalData, metric, 'CHN', resolution, d.properties.name),
+      updateTriggers: {
+        getFillColor: [globalData, metric, resolution]
+      },
+      pickable: true,
+      onHover: data => onHoverProvince(data, setToolTip, globalData, resolution),
       onClick: (data) => {
         console.log('clicked:', data)
       },
     }),
   ];
 
-  // if (staticMap) {
-  //   console.log(staticMap.getMap());
-  // }
-
   return (
     <div>
       <div style={{ margin: '1rem', position: 'absolute', zIndex: 2 }}>
-        <Radio.Group value={metric} onChange={e => setMetric(e.target.value)}>
+        <Radio.Group value={metric} onChange={e => setMetric(e.target.value)}
+          style={{ marginBottom: '1rem', marginRight: '1rem', whiteSpace: 'nowrap' }}>
           <Radio.Button value="active">Active</Radio.Button>
           <Radio.Button value="confirmed">Confirmed</Radio.Button>
           <Radio.Button value="deaths">Deaths</Radio.Button>
           <Radio.Button value="recovered">Recovered</Radio.Button>
         </Radio.Group>
-        <Radio.Group value={resolution} onChange={e => setResolution(e.target.value)} style={{ marginLeft: '1rem' }}>
+        <Radio.Group value={resolution} onChange={e => setResolution(e.target.value)}>
           <Radio.Button value="country">Country</Radio.Button>
           <Radio.Button value="province">Province</Radio.Button>
         </Radio.Group>
