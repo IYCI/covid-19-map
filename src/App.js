@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import DeckGL from '@deck.gl/react';
-import { GeoJsonLayer  } from '@deck.gl/layers'; // GeoJsonLayer 
-import { StaticMap } from 'react-map-gl';
+import { GeoJsonLayer } from '@deck.gl/layers'; // GeoJsonLayer 
+import { StaticMap, NavigationControl, _MapContext as MapContext } from 'react-map-gl';
 import axios from 'axios';
 import { pick } from 'lodash';
 import 'antd/dist/antd.css';
 import { Radio } from 'antd';
+import { Colorscale } from 'react-colorscales';
+import chroma from 'chroma-js';
+import {
+  BrowserView,
+  MobileView,
+  // isBrowser,
+  // isMobile
+} from "react-device-detect";
 
 
 import { getFillColor, getFillColorProvince, onHover, onHoverProvince } from './utils';
@@ -28,7 +36,8 @@ const GEO_JSON_API = 'https://raw.githubusercontent.com/haxzie/covid19-layers-ap
 const GLOBAL_API = 'https://covid19.mathdro.id/api/confirmed';
 const fieldsToFilter = ['provinceState', 'countryRegion', 'lastUpdate', 'lat', 'long', 'confirmed', 'recovered', 'deaths', 'active'];
 const metrics = ['confirmed', 'recovered', 'deaths', 'active'];
-// const colorScale = chroma.scale(['lightgreen', 'red', 'black']);
+const colorScale = chroma.scale(['#fefee9', '#6c0101']);
+const colorBreakDown = Array.apply(null, Array(10)).map((_, i) => colorScale(i / 10));
 
 function App() {
   // eslint-disable-next-line no-unused-vars
@@ -38,7 +47,8 @@ function App() {
   const [globalData, setGlobalData] = useState({});
   const [toolTipData, setToolTip] = useState(); // { x, y, id, name, data: { confirmed, deaths, recovered } }
   const [metric, setMetric] = useState('active');
-  const [resolution, setResolution] = useState('country');
+  const [resolution, setResolution] = useState('province');
+  const [colorMax, setColorMax] = useState(1000);
 
   useEffect(() => {
     const loadData = async () => {
@@ -80,20 +90,41 @@ function App() {
     if (!toolTipData) {
       return null;
     }
-    // console.log(toolTipData)
     const { x, y, name, id, data: { confirmed = 0, deaths = 0, recovered = 0, active = 0, lastUpdate = null } = {} } = toolTipData;
     return (
-      <div style={{ position: 'absolute', zIndex: 1, pointerEvents: 'none', left: x, top: y, backgroundColor: 'white', padding: '1rem', borderRadius: '4px' }}>
-        <h2 style={{ margin: '0 0 1rem 0' }}>{name} - {id}</h2>
-        <div>active: {active}</div>
-        <div>confirmed: {confirmed}</div>
-        <div>deaths: {deaths}</div>
-        <div>recovered: {recovered}</div>
-        { lastUpdate && (<div>last update: {new Date(lastUpdate).toLocaleString()}</div>)}
-      </div>
+      <React.Fragment>
+        <BrowserView>
+          <div style={{ position: 'fixed', zIndex: 5, pointerEvents: 'none', left: x, top: y, backgroundColor: 'white', padding: '1rem', borderRadius: '4px', minWidth: '200px' }}>
+            <h2 style={{ margin: '0 0 1rem 0' }}>{name} - {id}</h2>
+            <div>active: {active}</div>
+            <div>confirmed: {confirmed}</div>
+            <div>deaths: {deaths}</div>
+            <div>recovered: {recovered}</div>
+            { lastUpdate && (<div>last update: {new Date(lastUpdate).toLocaleString()}</div>)}
+          </div>
+        </BrowserView>
+        <MobileView>
+          <div style={{ position: 'absolute', zIndex: 5, left: '1rem', right: '1rem', bottom: '1rem', backgroundColor: 'white', padding: '1rem', borderRadius: '4px' }}>
+            <h2 style={{ margin: '0 0 1rem 0' }}>{name} - {id}</h2>
+            <div>active: {active}</div>
+            <div>confirmed: {confirmed}</div>
+            <div>deaths: {deaths}</div>
+            <div>recovered: {recovered}</div>
+            { lastUpdate && (<div>last update: {new Date(lastUpdate).toLocaleString()}</div>)}
+          </div>
+        </MobileView>
+      </React.Fragment>
     );
   }
 
+  const onResolutionChange = ({ target: { value } }) => {
+    setResolution(value);
+    if (value === 'country') {
+      setColorMax(15000);
+    } else {
+      setColorMax(1000);
+    }
+  }
 
   /* rendering */
   const layers = [
@@ -102,7 +133,7 @@ function App() {
       data: geoJson,
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
-      getFillColor: d => getFillColor(globalData, metric, d.id, resolution),
+      getFillColor: d => getFillColor(globalData, colorMax, metric, d.id, resolution),
       updateTriggers: {
         getFillColor: [globalData, metric, resolution]
       },
@@ -121,7 +152,7 @@ function App() {
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
       visible: resolution === 'province',
-      getFillColor: d => getFillColorProvince(globalData, metric, 'USA', resolution, d.properties.name),
+      getFillColor: d => getFillColorProvince(globalData, colorMax, metric, 'USA', resolution, d.properties.name),
       updateTriggers: {
         getFillColor: [globalData, metric, resolution]
       },
@@ -137,7 +168,7 @@ function App() {
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
       visible: resolution === 'province',
-      getFillColor: d => getFillColorProvince(globalData, metric, 'CAN', resolution, d.properties.name),
+      getFillColor: d => getFillColorProvince(globalData, colorMax, metric, 'CAN', resolution, d.properties.name),
       updateTriggers: {
         getFillColor: [globalData, metric, resolution]
       },
@@ -153,7 +184,7 @@ function App() {
       highlightColor: [0, 0, 0, 50],
       autoHighlight: true,
       visible: resolution === 'province',
-      getFillColor: d => getFillColorProvince(globalData, metric, 'CHN', resolution, d.properties.name),
+      getFillColor: d => getFillColorProvince(globalData, colorMax, metric, 'CHN', resolution, d.properties.name),
       updateTriggers: {
         getFillColor: [globalData, metric, resolution]
       },
@@ -175,7 +206,7 @@ function App() {
           <Radio.Button value="deaths">Deaths</Radio.Button>
           <Radio.Button value="recovered">Recovered</Radio.Button>
         </Radio.Group>
-        <Radio.Group value={resolution} onChange={e => setResolution(e.target.value)}>
+        <Radio.Group value={resolution} onChange={onResolutionChange}>
           <Radio.Button value="country">Country</Radio.Button>
           <Radio.Button value="province">Province</Radio.Button>
         </Radio.Group>
@@ -185,11 +216,26 @@ function App() {
         controller={true}
         layers={layers}
         Style={{ width: '100vw', height: '100vh'}}
+        ContextProvider={MapContext.Provider}
       >
         <StaticMap ref={setStaticMap} width='100%' height='100%' mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={MAPBOX_STYLE} />
-        
+        <div style={{ position: "absolute", right: '1rem', bottom: '6rem', zIndex: 1 }}>
+          <NavigationControl showCompass={false} />
+        </div>
       </DeckGL>
       { _renderTooltip() }
+      <div style={{ zIndex: 3, position: 'absolute', bottom: '1.5rem', right: '1rem', width: '250px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span>0</span>
+          <span>number of {metric} cases</span>
+          <span>{colorMax}</span>
+        </div>
+        <Colorscale
+          colorscale={colorBreakDown}
+          onClick={() => {}}
+          width='150px'
+        />
+      </div>
     </div>
   );
 }

@@ -11,18 +11,18 @@ const countryFilter = [
 const colorScale = chroma.scale(['#fefee9', '#6c0101']);
 const defaultFill = [0, 0, 0, 0];
 
-const getFillColor = (globalData, metric, isoCode, resolution) => {
+const getFillColor = (globalData, colorMax, metric, isoCode, resolution) => {
   if (resolution === 'province' && countryFilter.includes(isoCode)) {
     return defaultFill;
   }
   if (globalData[isoCode] && globalData[isoCode][metric] > 0) {
     const metricValue = globalData[isoCode][metric];
-    return [ ...colorScale(metricValue / 8000).rgb(), 150 ];
+    return [ ...colorScale(metricValue / colorMax).rgb(), 150 ];
   }
   return defaultFill;
 }
 
-const getFillColorProvince = (globalData, metric, isoCode, resolution, provinceName) => {
+const getFillColorProvince = (globalData, colorMax, metric, isoCode, resolution, provinceName) => {
   if (resolution === 'country' || !globalData[isoCode]) {
     return defaultFill;
   }
@@ -30,7 +30,7 @@ const getFillColorProvince = (globalData, metric, isoCode, resolution, provinceN
 
   if (provinces[provinceName] && provinces[provinceName][metric] > 0) {
     const metricValue = provinces[provinceName][metric];
-    return [ ...colorScale(metricValue / 8000).rgb(), 150 ];
+    return [ ...colorScale(metricValue / colorMax).rgb(), 150 ];
   }
   return defaultFill;
 }
