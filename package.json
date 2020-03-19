@@ -12,6 +12,8 @@
     "deck.gl": "^8.0.17",
     "lodash": "^4.17.15",
     "react": "^16.13.0",
+    "react-colorscales": "^0.7.3",
+    "react-device-detect": "^1.11.14",
     "react-dom": "^16.13.0",
     "react-map-gl": "^5.2.3",
     "react-scripts": "3.4.0"
