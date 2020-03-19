@@ -21,8 +21,10 @@ countryMapping = {
   'Korea, South': 'KOR',
   'Cruise Ship': 'CRUISE-1',
   'Taiwan*': 'TWN',
-  'Congo (Kinshasa)': 'COD',
-  'occupied Palestinian territory': 'PSE'
+  'Congo (Kinshasa)': 'CG',
+  'Congo (Brazzaville)': 'CD',
+  'occupied Palestinian territory': 'PSE',
+  'Gambia, The': 'GMB'
 }
 name = ''
 

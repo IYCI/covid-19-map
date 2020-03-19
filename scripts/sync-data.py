@@ -68,8 +68,13 @@ def create_inital_data():
     timeSeries = {}
     for i in range(4, len(headers)):
       date = convertDateString(headers[i])
+      if len(row[i]) > 0:
+        c = int(row[i])
+      else:
+        c = ''
+
       timeSeries[date] = {
-          'c': int(row[i]),
+          'c': c,
           'd': '',
           'r': '',
       }
@@ -136,7 +141,11 @@ def appendMetricData(url, field):
 
     for i in range(4, len(headers)):
       date = convertDateString(headers[i])
-      timeSeries[date][field] = int(row[i])
+      if len(row[i]) > 0:
+        value = int(row[i])
+      else:
+        value = ''
+      timeSeries[date][field] = value
 
 def main():
   create_inital_data()
