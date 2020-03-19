@@ -219,7 +219,7 @@ function App() {
         ContextProvider={MapContext.Provider}
       >
         <StaticMap ref={setStaticMap} width='100%' height='100%' mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} mapStyle={MAPBOX_STYLE} />
-        <div style={{ position: "absolute", right: '1rem', bottom: '6rem', zIndex: 1 }}>
+        <div style={{ position: "absolute", right: '1rem', bottom: '6rem', zIndex: 10 }}>
           <NavigationControl showCompass={false} />
         </div>
       </DeckGL>
