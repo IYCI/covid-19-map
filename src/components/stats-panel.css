@@ -1,0 +1,75 @@
+.minimized-button {
+  margin: 1rem;
+  position: absolute;
+  z-index: 2;
+  right: 0;
+}
+
+.stats-panel {
+  width: 450px;
+  max-width: calc(100vw - 2rem);
+  margin: 1rem;
+  position: absolute;
+  z-index: 2;
+  right: 0;
+}
+
+.stats-panel .ant-card-head {
+  padding: 0 1rem;
+}
+
+.stats-panel .ant-card-body {
+  padding: 1rem;
+}
+
+.stats-group {
+  display: flex;
+  justify-content: space-between;
+  overflow-x: auto;
+}
+
+.stats-group .ant-statistic {
+  cursor: pointer;
+  padding: 6px;
+  margin-right: 6px;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.stats-group stats-wrapper:last-child {
+  margin-right: unset;
+}
+  
+.stats-group .ant-statistic:hover {
+  background-color: rgb(244, 245, 248);
+}
+
+.activeMetric {
+  background-color: #EAEDF3;
+}
+
+.stats-list {
+  height: 40vh;
+  margin: 1rem -1rem -1rem -1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.stats-list .ant-spin-nested-loading {
+  height: 100%;
+}
+
+.stats-list .ant-spin-container {
+  height: 100%;
+}
+
+.stats-list .ant-list-items {
+  height: 100%;
+  overflow: auto;
+}
+
+.stats-list-item {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  justify-content: space-between;
+}
