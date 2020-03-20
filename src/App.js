@@ -16,6 +16,7 @@ import {
 } from "react-device-detect";
 
 
+import StatsPanel from './components/stats-panel'
 import { getFillColor, getFillColorProvince, onHover, onHoverProvince } from './utils';
 import './App.css';
 import US_STATES from './geo/us-states.geojson';
@@ -224,6 +225,7 @@ function App() {
         </div>
       </DeckGL>
       { _renderTooltip() }
+      <StatsPanel globalData={globalData} />
       <div style={{ zIndex: 3, position: 'absolute', bottom: '1.5rem', right: '1rem', width: '250px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span>0</span>

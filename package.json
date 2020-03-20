@@ -11,6 +11,7 @@
     "chroma-js": "^2.1.0",
     "deck.gl": "^8.0.17",
     "lodash": "^4.17.15",
+    "numeral": "^2.0.6",
     "react": "^16.13.0",
     "react-colorscales": "^0.7.3",
     "react-device-detect": "^1.11.14",
