@@ -17,7 +17,7 @@ export default function StatsPanel ({ globalData }) {
     deaths: 0,
   }
 
-  let countryList = Object.entries(globalData).map(([iso3, data]) => {
+  const countryList = Object.entries(globalData).map(([iso3, data]) => {
     total.confirmed += data.confirmed;
     total.active += data.active;
     total.recovered += data.recovered;
