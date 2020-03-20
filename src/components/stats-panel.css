@@ -6,8 +6,8 @@
 }
 
 .stats-panel {
-  width: 450;
-  /* height: 50vh; */
+  width: 450px;
+  max-width: calc(100vw - 2rem);
   margin: 1rem;
   position: absolute;
   z-index: 2;
@@ -22,7 +22,13 @@
   padding: 1rem;
 }
 
-.statsGroup .ant-statistic {
+.stats-group {
+  display: flex;
+  justify-content: space-between;
+  overflow-x: auto;
+}
+
+.stats-group .ant-statistic {
   cursor: pointer;
   padding: 6px;
   margin-right: 6px;
@@ -30,11 +36,11 @@
   user-select: none;
 }
 
-.statsGroup stats-wrapper:last-child {
+.stats-group stats-wrapper:last-child {
   margin-right: unset;
 }
   
-.statsGroup .ant-statistic:hover {
+.stats-group .ant-statistic:hover {
   background-color: rgb(244, 245, 248);
 }
 

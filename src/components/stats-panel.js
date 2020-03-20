@@ -10,7 +10,6 @@ export default function StatsPanel ({ globalData }) {
   const [minimized, setMinimized] = useState(false);
   const [metric, setMetric] = useState('active');
 
-  console.log('StatsPanel', globalData)
   const total = {
     active: 0,
     confirmed: 0,
@@ -24,13 +23,8 @@ export default function StatsPanel ({ globalData }) {
     total.recovered += data.recovered;
     total.deaths += data.deaths;
     return { ...data, iso3 };
-  });
-  // sort does in place reordering and does not trigger rerender
-  console.log('before', countryList.slice(0, 5).map(c => c.countryRegion))
-  countryList = [...countryList].sort((c1, c2) => c1[metric] < c2[metric]);
-  console.log('after', countryList.slice(0, 5).map(c => c.countryRegion))
+  }).sort((c1, c2) => c2[metric] - c1[metric]);
   const metricList = Object.keys(total);
-  console.log(countryList)
 
   if (minimized) {
     return (
@@ -43,10 +37,17 @@ export default function StatsPanel ({ globalData }) {
     )
   }
 
-  const collapseBtn = (<CloseOutlined onClick={() => setMinimized(true)} />)
+  const collapseBtn = (
+    <Button
+      onClick={() => setMinimized(true)}
+      type='link'
+      icon={<CloseOutlined />}
+      style={{ color: 'rgba(0, 0, 0, 0.45)'}}>
+    </Button>
+  );
   return (
     <Card title="Global Stats" className='stats-panel' extra={collapseBtn}>
-      <div className='statsGroup' style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div className='stats-group'>
         {metricList.map(m => (
           <div className='stats-wrapper' onClick={() => setMetric(m)} key={m}>
             <Statistic
