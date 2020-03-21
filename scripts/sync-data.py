@@ -152,13 +152,13 @@ def main():
   appendMetricData(DEATHS_DATA_URL, 'd')
   appendMetricData(RECOVERED_DATA_URL, 'r')
   countryData['timestamp'] = round(datetime.now().timestamp())
-  fileOutputPath = Path(__file__).parent / 'country-data.json'
+  fileOutputPath = Path(__file__).parent / '../data/country-data.json'
   with open(fileOutputPath, 'w') as f:
     json.dump(countryData, f)
 
 if __name__ == '__main__':
   countryData = {}
-  countryMappingPath = Path(__file__).parent / 'country-mapping.json'
+  countryMappingPath = Path(__file__).parent / '../data/country-mapping.json'
   with open(countryMappingPath) as f:
     countryMapping = json.load(f)
   main()

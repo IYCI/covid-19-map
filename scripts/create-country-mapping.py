@@ -3,10 +3,14 @@ import urllib.parse
 import csv
 import json
 import pycountry
+from pathlib import Path
+
+countryMappingPath = Path(__file__).parent / '../data/country-mapping.json'
+populationMappingPath = Path(__file__).parent / '../data/population-mapping.json'
 
 confirmed_data_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
 
-with open('population-mapping.json', 'r') as jsonFile:
+with open(populationMappingPath, 'r') as jsonFile:
   populationMapping = json.load(jsonFile)
 
 try:
@@ -53,9 +57,11 @@ for row in csvReader:
       populationMapping[newEntry] = ''
       hasNewPopulationEntry = True
 
-with open('country-mapping.json', 'w') as jsonFile:
+with open(countryMappingPath, 'w') as jsonFile:
   json.dump(countryMapping, jsonFile, indent=2)
 
 if hasNewPopulationEntry == True:
-  with open('population-mapping.json', 'w') as jsonFile:
+  with open(populationMappingPath, 'w') as jsonFile:
     json.dump(populationMapping, jsonFile, indent=2)
+else:
+  print('No new entry found')
