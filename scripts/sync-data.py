@@ -86,16 +86,22 @@ def create_inital_data():
 
     countryObject = countryData.get(countryCode)
     if countryObject == None:
+      population = populationMapping.get(
+          countryCode) if countryCode in populationMapping else 0
       countryObject = {
         'countryName': countryName,
+        'population': population,
         'provinces': {}
       }
 
     provinceName = row[0]
     if len(provinceName) > 0:
+      population = populationMapping.get(
+          provinceName) if countryCode in populationMapping else 0
       countryObject['provinces'][provinceName] = {
         'timeSeries': timeSeries,
-        'coordinates': coordinates
+        'coordinates': coordinates,
+        'population': population,
       }
     else:
       countryObject['coordinates'] = coordinates
@@ -152,13 +158,14 @@ def main():
   appendMetricData(DEATHS_DATA_URL, 'd')
   appendMetricData(RECOVERED_DATA_URL, 'r')
   countryData['timestamp'] = round(datetime.now().timestamp())
-  fileOutputPath = Path(__file__).parent / 'country-data.json'
+  fileOutputPath = Path(__file__).parent / '../data/country-data.json'
   with open(fileOutputPath, 'w') as f:
     json.dump(countryData, f)
 
 if __name__ == '__main__':
   countryData = {}
-  countryMappingPath = Path(__file__).parent / 'country-mapping.json'
-  with open(countryMappingPath) as f:
+  with open(Path(__file__).parent / '../data/country-mapping.json') as f:
     countryMapping = json.load(f)
+  with open(Path(__file__).parent / '../data/population-mapping.json') as f:
+    populationMapping = json.load(f)
   main()
