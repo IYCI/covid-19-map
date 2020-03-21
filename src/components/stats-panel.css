@@ -6,7 +6,7 @@
 }
 
 .stats-panel {
-  width: 450px;
+  width: 470px;
   max-width: calc(100vw - 2rem);
   margin: 1rem;
   position: absolute;
@@ -26,12 +26,14 @@
   display: flex;
   justify-content: space-between;
   overflow-x: auto;
+  margin: -1rem;
+  padding: 1rem;
 }
 
 .stats-group .ant-statistic {
   cursor: pointer;
-  padding: 6px;
-  margin-right: 6px;
+  padding: 8px;
+  margin-right: 8px;
   border-radius: 4px;
   user-select: none;
 }
@@ -49,21 +51,21 @@
 }
 
 .stats-list {
-  height: 40vh;
+  /* max-height: 40vh; */
   margin: 1rem -1rem -1rem -1rem;
   border-top: 1px solid #f0f0f0;
 }
 
-.stats-list .ant-spin-nested-loading {
+/* .stats-list .ant-spin-nested-loading {
   height: 100%;
 }
 
 .stats-list .ant-spin-container {
   height: 100%;
-}
+} */
 
 .stats-list .ant-list-items {
-  height: 100%;
+  max-height: 40vh;
   overflow: auto;
 }
 
@@ -72,4 +74,25 @@
   padding-right: 1rem;
   display: flex;
   justify-content: space-between;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  background-color: rgb(244, 245, 248);
+}
+
+
+/* card title */
+.stats-panel .ant-card-head-title {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.breadcrumb-item:hover {
+  color: #40a9ff;
+  cursor: pointer;
 }
