@@ -65,7 +65,7 @@ function App() {
           let country = globalDataMap[d.iso3];
           if (!country) {
             globalDataMap[d.iso3] = pick(d, ['countryRegion', 'lastUpdate', 'confirmed', 'recovered', 'deaths', 'active']);
-            globalDataMap[d.iso3].provinces = { [d.provinceState]: pick(d, fieldsToFilter) };
+            globalDataMap[d.iso3].provinces = {};
           } else {
             metrics.forEach(m => {
               country[m] += d[m];
@@ -73,7 +73,9 @@ function App() {
             if (d.lastUpdate > country.lastUpdate) {
               country.lastUpdate = d.lastUpdate;
             }
-            country.provinces[d.provinceState] = pick(d, fieldsToFilter);
+            if (d.provinceState) {
+              country.provinces[d.provinceState] = pick(d, fieldsToFilter);
+            }
           }
         })
         window.globalDataMap = globalDataMap; // for debugging purpose
