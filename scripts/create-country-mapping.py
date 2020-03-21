@@ -6,6 +6,9 @@ import pycountry
 
 confirmed_data_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
 
+with open('population-mapping.json', 'r') as jsonFile:
+  populationMapping = json.load(jsonFile)
+
 try:
   response = urllib.request.urlopen(confirmed_data_url)
 except urllib.error.HTTPError as error:
@@ -27,8 +30,7 @@ countryMapping = {
   'Gambia, The': 'GMB',
   'Bahamas, The': 'BS'
 }
-name = ''
-populationMap = {}
+hasNewPopulationEntry = False
 
 next(csvReader) # Skip header
 for row in csvReader:
@@ -41,22 +43,19 @@ for row in csvReader:
       except:
         print(f'Failed to look up iso code for {name}')
 
-    if len(row[0]) > 0 and ',' not in row[0]:
-      populationMap[row[0]] = ''
+    if len(row[0]) > 0 and ',' not in row[0] and row[0] != row[1]:
+      newEntry = row[0]
     else:
-      populationMap[code] = ''
+      newEntry = code
 
-with open('population.csv', 'r') as f:
-  reader = csv.reader(f)
-  next(reader)
-  for entry in reader:
-    if entry[1] in populationMap:
-      filtered = list(filter(lambda x: len(x) > 0, entry))
-      populationMap[entry[1]] = int(filtered[-1])
-
+    if newEntry not in populationMapping and newEntry != 'From Diamond Princess':
+      print(f'Adding {newEntry} to population mapping')
+      populationMapping[newEntry] = ''
+      hasNewPopulationEntry = True
 
 with open('country-mapping.json', 'w') as jsonFile:
-  json.dump(countryMapping, jsonFile)
+  json.dump(countryMapping, jsonFile, indent=2)
 
-with open('population-mapping.json', 'w') as jsonFile:
-  json.dump(populationMap, jsonFile)
+if hasNewPopulationEntry == True:
+  with open('population-mapping.json', 'w') as jsonFile:
+    json.dump(populationMapping, jsonFile, indent=2)
