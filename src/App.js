@@ -66,6 +66,9 @@ function App() {
           if (!country) {
             globalDataMap[d.iso3] = pick(d, ['countryRegion', 'lastUpdate', 'confirmed', 'recovered', 'deaths', 'active']);
             globalDataMap[d.iso3].provinces = {};
+            if (d.provinceState) {
+              globalDataMap[d.iso3].provinces[d.provinceState] = pick(d, fieldsToFilter);
+            }
           } else {
             metrics.forEach(m => {
               country[m] += d[m];
